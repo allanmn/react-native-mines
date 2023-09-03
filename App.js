@@ -1,11 +1,59 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import params from "./src/params";
-import Field from "./src/components/Field";
 import { Component } from "react";
-import Flag from "./src/components/Flag";
+import {
+  cloneBoard,
+  createMinedBoard,
+  hadExplosion,
+  openField,
+  showMines,
+  wonGame,
+} from "./src/logic";
+import MineField from "./src/components/MineField";
 
 export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = this.createState();
+  }
+
+  minesAmount = () => {
+    const cols = params.getColumnsAmount();
+    const rows = params.getRowsAmount();
+    return Math.ceil(cols * rows * params.difficultLevel);
+  };
+
+  createState = () => {
+    const cols = params.getColumnsAmount();
+    const rows = params.getRowsAmount();
+
+    return {
+      board: createMinedBoard(rows, cols, this.minesAmount()),
+      won: false,
+      lost: false,
+    };
+  };
+
+  onOpenField = (row, column) => {
+    const board = cloneBoard(this.state.board);
+    openField(board, row, column);
+    const lost = hadExplosion(board);
+    const won = wonGame(board);
+
+    if (lost) {
+      showMines(board);
+      Alert.alert("Perdeeeeu!", "Que buuuuurro!");
+    }
+
+    if (won) {
+      Alert.alert("Parabéns", "Você venceu!");
+    }
+
+    this.setState({ board, lost, won });
+  };
+
   render() {
+    // console.log(this.state.board)
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>Iniciando o Mines!</Text>
@@ -13,15 +61,9 @@ export default class App extends Component {
           Tamanho da grade: {params.getRowsAmount()}x{params.getColumnsAmount()}
         </Text>
 
-        <Field />
-        <Field opened nearMines={1}/>
-        <Field opened nearMines={2}/>
-        <Field opened nearMines={3}/>
-        <Field opened nearMines={6}/>
-        <Field mined/>
-        <Field mined opened/>
-        <Field mined opened exploded/>
-        <Field flagged/>
+        <View style={styles.board}>
+          <MineField board={this.state.board} onOpenField={this.onOpenField}/>
+        </View>
       </View>
     );
   }
@@ -30,18 +72,10 @@ export default class App extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    justifyContent: "flex-end",
+  },
+  board: {
     alignItems: "center",
-    justifyContent: "center",
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: "center",
-    margin: 10,
-  },
-  instructions: {
-    fontSize: 15,
-    textAlign: "center",
-    margin: 10,
+    backgroundColor: "#AAA",
   },
 });
