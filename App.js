@@ -4,6 +4,7 @@ import { Component } from "react";
 import {
   cloneBoard,
   createMinedBoard,
+  flagsUsed,
   hadExplosion,
   invertFlag,
   openField,
@@ -11,6 +12,7 @@ import {
   wonGame,
 } from "./src/logic";
 import MineField from "./src/components/MineField";
+import Header from "./src/components/Header";
 
 export default class App extends Component {
   constructor(props) {
@@ -69,13 +71,18 @@ export default class App extends Component {
     // console.log(this.state.board)
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Iniciando o Mines!</Text>
-        <Text style={styles.instructions}>
-          Tamanho da grade: {params.getRowsAmount()}x{params.getColumnsAmount()}
-        </Text>
-
+        <Header
+          onNewGame={() => {
+            this.setState(this.createState());
+          }}
+          flagsLeft={this.minesAmount() - flagsUsed(this.state.board)}
+        />
         <View style={styles.board}>
-          <MineField board={this.state.board} onOpenField={this.onOpenField} onSelectField={this.onSelectField}/>
+          <MineField
+            board={this.state.board}
+            onOpenField={this.onOpenField}
+            onSelectField={this.onSelectField}
+          />
         </View>
       </View>
     );
